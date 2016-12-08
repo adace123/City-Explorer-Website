@@ -257,7 +257,7 @@ if(navigator.geolocation){
 			var country = data.results[0].address_components[5].long_name;
 			
            
-			$http.jsonp("https://www.distance24.org/route.json", {params: {
+			$http.jsonp("http://www.distance24.org/route.json", {params: {
     "stops": city+"|"+dest,
     "jsonp": "JSON_CALLBACK"
 }}).then(function(data){
