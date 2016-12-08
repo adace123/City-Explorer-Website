@@ -1,7 +1,7 @@
 <!-- Aaron Feigenbaum -->
 <!-- huge thanks to the people on reddit and stackoverflow who helped me out -->
-<!-- credit to the Wunderground, Google Maps and Distance24 APIs-->
-<!-- please be sure to run this on a server -->
+<!-- credit to the Wunderground and Google Maps APIs-->
+
 <!DOCTYPE html>
 <html ng-app='myApp'>
 <meta http-equiv="cache-control" content="max-age=0" />
@@ -21,6 +21,7 @@
 <script src="https://cdn.jsdelivr.net/sweetalert2/6.2.0/sweetalert2.min.js"></script>
 
 <style>
+/*credit to a user on stackoverflow for the resultsList CSS*/
 #resultsList{
     margin:0;
     padding:10;
@@ -158,6 +159,7 @@ function distance(lat1, lon1, lat2, lon2, unit) {
 app.controller('MainController',function($scope,$http,$q){
 $scope.toggleFlag = false;
 $scope.tdCount=false;
+//toggles visibility of city pics
 $scope.toggle = function(){
 $('#resultsList').fadeToggle(700); 
 this.toggleFlag = true;
@@ -165,6 +167,7 @@ $(document).scrollTop($('#resultsList').offset().top);
 };
 
 //------------------------------------------------------------------------------------------------
+//get request to JSON database
 $scope.retrieve = function(){
 $http.get("capitals.json",{ headers: { 'Cache-Control' : 'no-cache' } }).success
 (function(data){
@@ -178,7 +181,7 @@ console.log(data[i].city);
 
 
 //------------------------------------------------------------------------------------------------
- 
+//get request to weather API, parses temp and time from results
 
 $scope.getWeather = function(city,country,state=""){
 if(country=="United States"||country=="U.S.A."||country=="USA"||country=="Canada")
@@ -197,6 +200,8 @@ $http.get(weatherUrl).success(function(result){
 }
 //------------------------------------------------------------------------------------------------
 $scope.addCapital = function(){
+//sends post request to PHP file to update JSON database, checks if city entered is American/Canadian and requires
+//state field if so, also checks if city is valid
 swal({background:'#ACF1F4',title:"<p style='color:purple;font-family:Pacifico'>Add a City</p>",
 html:"<form><span style='color:teal;font-family:Righteous'>Enter city: </span><input style='background-color:#CEFDFF;font-family:Pacifico;' type='text' name='in1' id='in1'><br><br><span style='color:teal;font-family:Righteous;float:left;margin-left:57px;'>Enter state: <br><p style='font-size:10px;'>(U.S. and Canada only)</p></span><input type='text' style='margin-right:72px;background-color:#CEFDFF;font-family:Pacifico;' name='state' id='state'><br><br>"+
 "<br><span style='color:teal;font-family:Righteous;float:left;margin-left:50px;margin-top:5px;'>Enter country: </span><input style='background-color:#CEFDFF;font-family:Pacifico;margin-right:72px;' type='text' name='in2' id='in2'><br><br>"+
@@ -259,7 +264,7 @@ else swal({background:'#ACF1F4',text:"<h1 style='color:red;font-family:Pacifico;
 }
 //------------------------------------------------------------------------------------------------
 $scope.getDistance = function(dest){
-
+//gets user coordinates if geolocation enabled, gets coordinates of dest input, finds distance between the two
 if(navigator.geolocation){
      navigator.geolocation.getCurrentPosition(function(position) {
             var pos = {
@@ -286,6 +291,7 @@ else swal({background:'#ACF1F4',text:"Error. Browser does not support geolocatio
 }
 //------------------------------------------------------------------------------------------------
 $scope.login = function(){
+//checks if username and password are correct, redirects to admin page if so
 swal({background:'#ACF1F4',title:"<p style='font-family:Pacifico;color:purple;'>Login Form</p>",html:"<form method='post'><span style='font-family:Righteous'>Username:</span><input id='username' name='username' ><br><br><span style='font-family:Righteous'>Password:</span><input type='password' id='password' name='password'><br><br></form>",confirmButtonText: 'Submit',showCancelButton: true
 }).then(function(){
 var username = $('#username').val();
@@ -305,6 +311,7 @@ else swal({background:'#ACF1F4',text:"<h1 style='background-color:#CEFDFF;font-f
 }
 
 //------------------------------------------------------------------------------------------------
+//redirects to main page
 $scope.logout = function(){
 swal({background:'#ACF1F4',html:"<h1 style='font-family:Pacifico;'>Logged out. Click 'ok' to return to the main page.</h1>",type:'success'})
 .then(function(){
@@ -313,6 +320,7 @@ window.location.href='index.html';
 }
 //------------------------------------------------------------------------------------------------
 $scope.register = function(){
+//creates registration form that gets sent to PHP file
 swal({background:'#ACF1F4',title:"<p style='color:purple;font-family:Pacifico'>Admin Registration Form</p>",
 html:"<form method='post'><span style='color:teal;font-family:Righteous'>Name: </span><input style='background-color:#CEFDFF;font-family:Pacifico;' id='name' name='name'><br><br>"+
 "<span style='color:teal;font-family:Righteous'>Email: </span><input id='email' style='background-color:#CEFDFF;font-family:Pacifico;' type='email' name='email'><br><br><span style='font-family:Pacifico;font-size:24px;color:teal'>Why do you want to register?</span>"+
@@ -335,13 +343,14 @@ swal({background:'#ACF1F4',text:"Registration request sent! You should receive a
 
 }
 //------------------------------------------------------------------------------------------------
+//each pic is larger on click
 $scope.largePic = function(imagesrc){
 swal({background:'#ACF1F4',width:1200,height:600,imageUrl:imagesrc,imageWidth:1200,imageHeight:600,animation:true});
 }
 
 });
 
-
+//credit to a reddit user for this
 app.config(['$httpProvider', function($httpProvider) {
         $httpProvider.defaults.useXDomain = true;
         delete $httpProvider.defaults.headers.common['X-Requested-With'];
