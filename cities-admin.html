@@ -167,9 +167,9 @@ console.log(data[i].city);
 
 $scope.getWeather = function(city,country,state=""){
 if(country=="United States"||country=="U.S.A."||country=="USA"||country=="Canada")
-var weatherUrl = "http://api.wunderground.com/api/"+weatherAPI+"/conditions/q/"+state+"/"+city+".json";
+var weatherUrl = "https://api.wunderground.com/api/"+weatherAPI+"/conditions/q/"+state+"/"+city+".json";
 else
-weatherUrl = "http://api.wunderground.com/api/"+weatherAPI+"/conditions/q/"+country+"/"+city+".json";
+weatherUrl = "https://api.wunderground.com/api/"+weatherAPI+"/conditions/q/"+country+"/"+city+".json";
 
 $http.get(weatherUrl).success(function(result){
     var temp = result.current_observation.temp_f;
@@ -257,7 +257,7 @@ if(navigator.geolocation){
 			var country = data.results[0].address_components[5].long_name;
 			
            
-			$http.jsonp("http://www.distance24.org/route.json", {params: {
+			$http.jsonp("https://www.distance24.org/route.json", {params: {
     "stops": city+"|"+dest,
     "jsonp": "JSON_CALLBACK"
 }}).then(function(data){
