@@ -1,0 +1,338 @@
+<!-- Aaron Feigenbaum -->
+<!-- huge thanks to the people on reddit and stackoverflow who helped me out -->
+<!-- credit to the Wunderground, Google Maps and Distance24 APIs-->
+<!-- please be sure to run this on a server -->
+<!DOCTYPE html>
+<html ng-app='myApp'>
+<meta http-equiv="cache-control" content="max-age=0" />
+<meta http-equiv="cache-control" content="no-cache" />
+<meta http-equiv="expires" content="0" />
+<meta http-equiv="expires" content="Tue, 01 Jan 1980 1:00:00 GMT" />
+<meta http-equiv="pragma" content="no-cache" />
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.7/angular.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+
+<link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Oxygen">
+<link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Pacifico">
+<link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Lobster">
+<link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Righteous">
+<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.2/css/bootstrap.min.css">
+<link href="https://cdn.jsdelivr.net/sweetalert2/6.2.0/sweetalert2.min.css" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/sweetalert2/6.2.0/sweetalert2.min.js"></script>
+
+<style>
+#resultsList{
+    margin:0;
+    padding:10;
+	text-align:center;
+}
+
+#resultsList li{
+    width:33.333%;
+    float:left;
+    display:inline-block;
+    height:350px;
+    position:relative;
+	padding:10px;
+}
+
+#resultsList li:nth-child(3n+0){
+    padding-bottom:20px;
+	
+}
+#resultsList li:nth-child(3n+0):after{
+    content:" ";
+    position:absolute;
+    left:-200%;
+    right:0;
+    bottom:0;
+    height:20px;  
+}
+#resultsList li img{
+    width:100%;
+    height:250px;
+    margin:0 auto;
+	display:inline-block;
+
+}
+ body{
+ background:url('bd32992c8dee0e23dbeb3f9bdc763e97.jpg') no-repeat center center fixed;
+ background-size: cover;
+ }
+ h1{font-family:Pacifico;}
+ .container{margin-top:80px;font-family:"Oxygen";}
+ .jumbotron{text-align:center;background-color:#26c6da; transition:background-color 2s ease;}
+ .jumbotron:hover{background-color:purple;}
+ .queryDiv{display:inline-block;padding:10px;}
+ .thumbnail{background-color:#26c6da;}
+label{font-family:Pacifico;font-size:20px;}
+.queryDiv a{font-family:Lobster;font-size:22px;color:black;}
+.queryDiv h4{background-color:#26c6da;}
+#cityinfo strong{font-family:Lobster;font-size:18px;}
+#cityinfo button,#footer button{border-radius:25px;}
+#citystrong{font-family:Righteous;font-size:18px;font-weight:800;}
+#add,#logout{font-family:Righteous;font-size:14px;outline:none;}
+.form-control{background-color:#C3F2F2;color:#226666;font-family:Righteous;font-size:20px;}
+#citybutton button{border-radius:25px;outline:none;}
+#cityimg{cursor:pointer;}
+</style>
+<body ng-controller="MainController" ng-init="retrieve()">
+<div class="jumbotron"><h1>City Explorer</h1></div>
+<div class="container">
+
+<form ng-submit="addCapital()">
+<div class="form-group">
+<label>City Search <span class="glyphicon glyphicon-search"></span></label> <input class="form-control" ng-model="pic.city">
+<div class="queryDiv" ng-show="pic.city" ng-repeat="item in pic|filter:pic.city|orderBy:'city' track by item.city"><h4 class="well well-sm"><a href="https://en.wikipedia.org/wiki/{{item.capital}}">{{item.city}}</a></h4></div>
+</div>
+
+<div class="form-group">
+<label>State Search <span class="glyphicon glyphicon-search"></span></label> <input class="form-control" ng-model="pic.state">
+<div class="queryDiv" ng-show="pic.state" ng-repeat="item in pic|filter:pic.state|orderBy:'state' track by item.state"><h4 class="well well-sm"><a href="https://en.wikipedia.org/wiki/{{item.state}}">{{item.state}}</a></h4></div>
+</div>
+
+<div class="form-group">
+<label>Country Search <span class="glyphicon glyphicon-search"></span></label></label> <input class="form-control" ng-model="pic.country">
+<div class="queryDiv" ng-show="pic.country" ng-repeat="item in pic|filter:pic.country|orderBy:'country' track by item.country"><h4 class="well well-sm">
+<a href="https://en.wikipedia.org/wiki/{{item.country}}">{{item.country}}</a></h4></div>
+</div>
+
+<div class="form-group">
+<label>Continent Search <span class="glyphicon glyphicon-search"></span></label></label> <input class="form-control" ng-model="pic.continent">
+<div class="queryDiv" ng-show="pic.continent" ng-repeat="item in pic|filter:pic.continent|orderBy:'continent' track by item.continent">
+<h4 class="well well-sm"><a href="https://en.wikipedia.org/wiki/{{item.continent}}">{{item.continent}}</a></h4></div>
+</div>
+<br>
+</form><br>
+<div id="citybutton" style="text-align:center;">
+<button class="btn btn-default btn-sm" style="background-color:#26c6da;" ng-click="toggle()"><strong id="citystrong">Show City Info</strong></button>
+</div><br><br>
+<ul id="resultsList" ng-show="toggleFlag" >
+<li ng-repeat="item in pic|filter:pic.city|filter:pic.country|filter:pic.continent">
+<div class="thumbnail">
+<img id="cityimg" alt="Oops. Doesn't seem to be anything here." ng-click="largePic(item.image)" ng-src="{{item.image}}"><br>
+<div id="cityinfo"><strong>{{item.city}}</strong>, <strong>{{item.country}}</strong>
+     <br><br>
+	<button class="btn btn-default btn-sm" style="font-family:Righteous;font-size:12px;bottom:10px;position:relative;background-color:#BDE8EE;" ng-click="getWeather(item.city,item.country,item.state)">Get Time and Weather</button>
+	<button class="btn btn-default btn-sm" style="font-family:Righteous;font-size:12px;bottom:10px;position:relative;background-color:#BDE8EE;" ng-click="getDistance(item.city)">Get Distance</button>
+</div>
+</div>
+</li>
+</ul>
+</div>
+<div id="footer" class="navbar navbar-default navbar-fixed-bottom" style="position:relative;bottom:0;margin:auto;top:220px;text-align:center;background-color:#9AECF8;">
+<span class="label label-info" style="background-color:#9AECF8;top:9px;position:relative;">
+<button id="add" ng-click="addCapital()" style="background-color:#26c6da;" class="btn btn-default btn-sm" ><strong>Add a City</strong></button>
+
+</span>
+<span class="label label-info" style="background-color:#9AECF8;top:9px;position:relative;">
+<a><button ng-click="logout()" id="logout" style="background-color:#26c6da;" class="btn btn-default btn-sm"><strong>Logout</strong></button></a>
+</span>
+
+</div>
+</body>
+
+<script>
+var app=angular.module('myApp',[]);
+
+var weatherAPI = "8db02a33f36d29ea";
+var imageAPI = "89f01397f82648c293c1eac2e3798ebf";
+var distanceAPI = "AIzaSyCkaYrtLU2N666cfsfumXIA4JD59o_wlwU";
+var geoAPI="AIzaSyCpVmLghZkP5LABfvObfBLaZZPgw3vjKrw";
+
+app.controller('MainController',function($scope,$http,$q){
+$scope.toggleFlag = false;
+$scope.tdCount=false;
+$scope.toggle = function(){
+$('#resultsList').fadeToggle(700); 
+this.toggleFlag = true;
+$(document).scrollTop($('#resultsList').offset().top);
+};
+
+//------------------------------------------------------------------------------------------------
+$scope.retrieve = function(){
+$http.get("capitals.json",{ headers: { 'Cache-Control' : 'no-cache' } }).success
+(function(data){
+$scope.pic = data;
+for(var i=0;i<data.length;i++)
+console.log(data[i].city);
+}).error(function(data, status, headers, config) {
+      swal("Error "+status, "error");
+    });
+}
+
+
+//------------------------------------------------------------------------------------------------
+ 
+
+$scope.getWeather = function(city,country,state=""){
+if(country=="United States"||country=="U.S.A."||country=="USA"||country=="Canada")
+var weatherUrl = "http://api.wunderground.com/api/"+weatherAPI+"/conditions/q/"+state+"/"+city+".json";
+else
+weatherUrl = "http://api.wunderground.com/api/"+weatherAPI+"/conditions/q/"+country+"/"+city+".json";
+
+$http.get(weatherUrl).success(function(result){
+    var temp = result.current_observation.temp_f;
+	var date = result.current_observation.local_time_rfc822;
+	var hours = date.slice(17,19); var minutes = date.slice(20,22);
+	if(hours>12) hours = (hours-12)+':'+minutes+' PM';
+    else hours = hours+':'+minutes+' AM';
+	swal({background:"#26c6da",html:"<h1 style='font-family:Pacifico'>The time in <span style='color:teal;'>"+ city +"</span> is <span style='color:purple;font-size:40px;'>"+hours+"</span> and the <span style='color:magenta'>temperature</span> is <span style='color:magenta;font-size:45px;'>"+temp+"</span> "+String.fromCharCode(176)+"F.</h1>"});
+	});
+}
+//------------------------------------------------------------------------------------------------
+$scope.addCapital = function(){
+swal({background:'#ACF1F4',title:"<p style='color:purple;font-family:Pacifico'>Add a City</p>",
+html:"<form><span style='color:teal;font-family:Righteous'>Enter city: </span><input style='background-color:#CEFDFF;font-family:Pacifico;' type='text' name='in1' id='in1'><br><br><span style='color:teal;font-family:Righteous;float:left;margin-left:57px;'>Enter state: <br><p style='font-size:10px;'>(U.S. and Canada only)</p></span><input type='text' style='margin-right:72px;background-color:#CEFDFF;font-family:Pacifico;' name='state' id='state'><br><br>"+
+"<br><span style='color:teal;font-family:Righteous;float:left;margin-left:50px;margin-top:5px;'>Enter country: </span><input style='background-color:#CEFDFF;font-family:Pacifico;margin-right:72px;' type='text' name='in2' id='in2'><br><br>"+
+"<span style='color:teal;font-family:Righteous;margin-left:40px;margin-top:5px;float:left;'>Enter continent: </span><input style='background-color:#CEFDFF;font-family:Pacifico;margin-right:70px;' type='text' name='in3' id='in3'><br><br><span style='color:teal;font-family:Righteous;margin-left:35px;margin-top:5px;float:left;'>Enter image URL: </span><input style='background-color:#CEFDFF;font-family:Pacifico;margin-right:62px;' type='text' name='in4' id='in4'><br><br>"
+,confirmButtonText: 'Submit',showCancelButton: true,showCloseButton: true,})
+.then(function(){
+var input1 = $('#in1');
+var input2 = $('#in2');
+var input3 = $('#in3');
+var input4 = $('#in4');
+var input5 = $('#state');
+if(input2.val()!="United States" && input2.val()!="U.S.A." && input2.val()!="USA" && input2.val()!="Canada"){
+if(input1.val()===""||input2.val()===""||input3.val()===""){
+swal({background:'#ACF1F4',text:"<h1 style='background-color:red;font-family:Pacifico;'>Must enter city, country and continent.</h1>"});
+return;
+}
+}
+
+else if(input2.val()=="United States"||input2.val()=="U.S.A."||input2.val()=="USA"||input2.val()=="Canada"){
+if(input5.val()==""||input2.val()==""){swal("Error. American/Canadian cities require city and state."); return;}
+for(var i=0;i<$scope.pic.length;i++){
+if($scope.pic[i].city===input1.val()&&$scope.pic[i].country===input2.val()&&$scope.pic[i].continent===input3.val()&&$scope.pic[i].state==input5.val()){
+swal({background:'#ACF1F4',text:"<h1 style='color:red;font-family:Pacifico;'>City already in database. Please enter another.</h1>",type:'error'});
+return;
+}
+}
+}
+
+for(var i=0;i<$scope.pic.length;i++){
+if($scope.pic[i].city===input1.val()&&$scope.pic[i].country===input2.val()&&$scope.pic[i].continent===input3.val()){ 
+swal({background:'#ACF1F4',text:"<h1 style='color:red;font-family:Pacifico;'>City already in database. Please enter another.</h1>",type:'error'});
+return;}
+}
+
+if(input4.val()==""){
+swal({background:'#ACF1F4',text:"<h1 style='color:red;font-family:Pacifico;'>Must enter image URL.</h1>",type:'error'}); return;
+}
+
+if(input2.val()=="United States"||input2.val()=="U.S.A."||input2.val()=="USA"||input2.val()=="Canada"){
+var userdata = {"city":input1.val(),"state":input5.val(),"country":input2.val(),"continent":input3.val(),"image":input4.val()};
+var url = "https://maps.googleapis.com/maps/api/geocode/json?address="+userdata.city+","+userdata.state+","+userdata.country+"&key="+geoAPI;
+}
+else{
+userdata = {"city":input1.val(),"country":input2.val(),"continent":input3.val(),"image":input4.val()};
+url = "https://maps.googleapis.com/maps/api/geocode/json?address="+userdata.city+","+userdata.country+"&key="+geoAPI;
+}
+
+$http.get(url).success(function(result){
+if(result.status=="OK") {console.log(result.status);
+$http.post('capitalData.php',userdata).then(function(data){
+$scope.retrieve();
+for(var i=0;i<data.length;i++)
+console.log(data[i].city);
+swal({background:'#ACF1F4',text:"<h1 style='background-color:#CEFDFF;font-family:Pacifico;'>Successfully added!</h1>",type:"success"});
+});
+}
+else swal({background:'#ACF1F4',text:"<h1 style='color:red;font-family:Pacifico;'>Error. No such city.</h1>",type:'error'});
+});
+});
+}
+//------------------------------------------------------------------------------------------------
+$scope.getDistance = function(dest){
+
+if(navigator.geolocation){
+     navigator.geolocation.getCurrentPosition(function(position) {
+            var pos = {
+              lat: position.coords.latitude,
+              lng: position.coords.longitude
+            }
+			$http.get("https://maps.googleapis.com/maps/api/geocode/json?latlng="+pos.lat+","+pos.lng+"&key="+geoAPI).success(function(data){
+			var city = data.results[0].address_components[2].long_name;
+			var state = data.results[0].address_components[4].long_name;
+			var country = data.results[0].address_components[5].long_name;
+			
+           
+			$http.jsonp("http://www.distance24.org/route.json", {params: {
+    "stops": city+"|"+dest,
+    "jsonp": "JSON_CALLBACK"
+}}).then(function(data){
+			
+			var distance = data.data.distance;
+			swal({background:'#ACF1F4',html:"<h1>"+"<span style='color:teal'>"+dest+"</span> is "+ "<span style='color:purple'>"+Math.round(((distance*0.621371)*100)/100)+"</span> miles from <span style='color:magenta'>"+city+"</span>.</h1>"});
+			});
+			});
+			});
+}
+else swal({background:'#ACF1F4',text:"<h1 style='background-color:red;font-family:Pacifico;'>Error. Browser does not support geolocation.</h1>", type:"error"});
+
+}
+//------------------------------------------------------------------------------------------------
+$scope.login = function(){
+swal({background:'#ACF1F4',title:"<p style='font-family:Pacifico;color:purple;'>Login Form</p>",html:"<form method='post'><span style='font-family:Righteous'>Username:</span><input id='username' name='username' ><br><br><span style='font-family:Righteous'>Password:</span><input type='password' id='password' name='password'><br><br></form>",confirmButtonText: 'Submit',showCancelButton: true
+}).then(function(){
+var username = $('#username').val();
+var password = $('#password').val();
+$http.post("login.php",{"username":username,"password":password}).then(function(data){
+if(data.config.data.password=="citypass"&&data.config.data.username=="cityuser"){
+swal({background:'#ACF1F4',text:"<h1 style='font-family:Pacifico;'>Successfully logged in! Redirecting...</h1>",type:'success'}).then(function(){
+window.location.href='cities-admin.html';
+});
+}
+else if((data.config.data.username!="cityuser"||data.config.data.password!="citypass")&&data.config.data.password!=""&&data.config.data.username!=""){
+swal({background:'#ACF1F4',text:"<h1 style='color:red;font-family:Pacifico;'>Incorrect username/password. Please try again.</h1>",type:'error'});
+}
+else swal({background:'#ACF1F4',text:"<h1 style='background-color:#CEFDFF;font-family:Pacifico;'>Fields cannot be blank.</h1>",type:'error'});
+})
+}).catch(swal.noop);
+}
+
+//------------------------------------------------------------------------------------------------
+$scope.logout = function(){
+swal({background:'#ACF1F4',html:"<h1 style='font-family:Pacifico;'>Logged out. Click 'ok' to return to the main page.</h1>",type:'success'})
+.then(function(){
+window.location.href='index.html'; 
+}).catch(swal.noop);
+}
+//------------------------------------------------------------------------------------------------
+$scope.register = function(){
+swal({background:'#ACF1F4',title:"<p style='color:purple;font-family:Pacifico'>Admin Registration Form</p>",
+html:"<form method='post'><span style='color:teal;font-family:Righteous'>Name: </span><input style='background-color:#CEFDFF;font-family:Pacifico;' id='name' name='name'><br><br>"+
+"<span style='color:teal;font-family:Righteous'>Email: </span><input id='email' style='background-color:#CEFDFF;font-family:Pacifico;' type='email' name='email'><br><br><span style='font-family:Pacifico;font-size:24px;color:teal'>Why do you want to register?</span>"+
+"<br><br><textarea style=background-color:#CEFDFF;font-size:20px;font-family:Pacifico;' id='text' rows='10' cols='40' name='text'></textarea></form>"
+,showCancelButton: true}).then(function(){
+var name = $('#name').val();
+var email = $('#email').val();
+var text = $('#text').val();
+$http.post('registration.php',{"name":name,"email":email,"text":text}).then(function(data){
+if(data.data=="short"){
+swal({background:'#ACF1F4',html:"<h1 style='color:purple'>Whoops. Must enter at least 50 characters in textarea.</h1>",type:'error'});
+}
+else{
+swal({background:'#ACF1F4',text:"Registration request sent! You should receive a response soon.",type:'success'});
+}
+});
+
+});
+
+
+}
+//------------------------------------------------------------------------------------------------
+$scope.largePic = function(imagesrc){
+swal({background:'#ACF1F4',width:1200,height:600,imageUrl:imagesrc,imageWidth:1200,imageHeight:600,animation:true});
+}
+
+});
+
+
+app.config(['$httpProvider', function($httpProvider) {
+        $httpProvider.defaults.useXDomain = true;
+        delete $httpProvider.defaults.headers.common['X-Requested-With'];
+    }
+]);
+</script>
+</html>

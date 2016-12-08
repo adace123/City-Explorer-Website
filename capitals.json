@@ -1,0 +1,37 @@
+[
+    {
+        "city": "Ottawa",
+        "country": "Canada",
+        "continent": "North America",
+        "image": "https:\/\/upload.wikimedia.org\/wikipedia\/commons\/2\/22\/Parliament-Ottawa.jpg",
+        "state": "Ontario"
+    },
+    {
+        "city": "Oslo",
+        "country": "Norway",
+        "continent": "Europe",
+        "image": "https:\/\/upload.wikimedia.org\/wikipedia\/commons\/thumb\/b\/bd\/Downtown_Oslo_Norway_skyline.png\/800px-Downtown_Oslo_Norway_skyline.png",
+        "state": null
+    },
+    {
+        "city": "Auckland",
+        "country": "New Zealand",
+        "continent": "Oceania",
+        "image": "https:\/\/upload.wikimedia.org\/wikipedia\/commons\/6\/6e\/Auckland_City_from_Mt_Victoria%2C_Devonport_-_Flickr_-_111_Emergency_%281%29.jpg",
+        "state": null
+    },
+    {
+        "city": "Buenos Aires",
+        "country": "Argentina",
+        "continent": "South America",
+        "image": "https:\/\/upload.wikimedia.org\/wikipedia\/commons\/thumb\/c\/c8\/Buenos_Aires_Panorama.jpg\/800px-Buenos_Aires_Panorama.jpg",
+        "state": null
+    },
+    {
+        "city": "Tokyo",
+        "country": "Japan",
+        "continent": "Asia",
+        "image": "https:\/\/upload.wikimedia.org\/wikipedia\/commons\/b\/bf\/Tokyo_Montage_2015.jpg",
+        "state": null
+    }
+]
