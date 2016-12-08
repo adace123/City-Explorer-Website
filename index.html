@@ -144,6 +144,21 @@ var imageAPI = "89f01397f82648c293c1eac2e3798ebf";
 var distanceAPI = "AIzaSyCkaYrtLU2N666cfsfumXIA4JD59o_wlwU";
 var geoAPI="AIzaSyCpVmLghZkP5LABfvObfBLaZZPgw3vjKrw";
 
+//credit to geodatasource.com for this function
+function distance(lat1, lon1, lat2, lon2, unit) {
+	var radlat1 = Math.PI * lat1/180
+	var radlat2 = Math.PI * lat2/180
+	var theta = lon1-lon2
+	var radtheta = Math.PI * theta/180
+	var dist = Math.sin(radlat1) * Math.sin(radlat2) + Math.cos(radlat1) * Math.cos(radlat2) * Math.cos(radtheta);
+	dist = Math.acos(dist)
+	dist = dist * 180/Math.PI
+	dist = dist * 60 * 1.1515
+	if (unit=="K") { dist = dist * 1.609344 }
+	if (unit=="N") { dist = dist * 0.8684 }
+	return dist
+}
+
 app.controller('MainController',function($scope,$http,$q){
 $scope.toggleFlag = false;
 $scope.tdCount=false;
@@ -248,14 +263,12 @@ if(navigator.geolocation){
 			var state = data.results[0].address_components[4].long_name;
 			var country = data.results[0].address_components[5].long_name;
 			
-           
-			$http.jsonp("http://www.distance24.org/route.json", {params: {
-    "stops": city+"|"+dest,
-    "jsonp": "JSON_CALLBACK"
-}}).then(function(data){
-			
-			var distance = data.data.distance;
-			swal({background:'#ACF1F4',html:"<h1>"+"<span style='color:teal'>"+dest+"</span> is "+ "<span style='color:purple'>"+Math.round(((distance*0.621371)*100)/100)+"</span> miles from <span style='color:magenta'>"+city+"</span>.</h1>"});
+            $http.get("https://maps.googleapis.com/maps/api/geocode/json?address="+dest+"&key="+geoAPI)
+			.success(function(data){
+			var dest_lat = data.results[0].geometry.location.lat;
+			var dest_lng = data.results[0].geometry.location.lng;
+			var total_distance = distance(pos.lat,pos.lng,dest_lat,dest_lng);console.log(total_distance);
+			swal({background:'#ACF1F4',html:"<h1>"+"<span style='color:teal'>"+dest+"</span> is around "+ "<span style='color:purple'>"+Math.round(total_distance)+"</span> miles from <span style='color:magenta'>"+city+"</span>.</h1>"});
 			});
 			});
 			});
