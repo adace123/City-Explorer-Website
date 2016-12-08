@@ -243,7 +243,7 @@ if(navigator.geolocation){
               lat: position.coords.latitude,
               lng: position.coords.longitude
             }
-			$http.get("https://maps.googleapis.com/maps/api/geocode/json?latlng="+pos.lat+","+pos.lng+"&key="+geoAPI).success(function(data){
+			$http.get("//maps.googleapis.com/maps/api/geocode/json?latlng="+pos.lat+","+pos.lng+"&key="+geoAPI).success(function(data){
 			var city = data.results[0].address_components[2].long_name;
 			var state = data.results[0].address_components[4].long_name;
 			var country = data.results[0].address_components[5].long_name;
